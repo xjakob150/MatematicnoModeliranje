@@ -1,133 +1,178 @@
 from flask import Flask, render_template, request, jsonify
-import random
-import csv
+import joblib
+import os
+import numpy as np
+from google import genai
 from flask_cors import CORS
-from ollama import chat
 
 app = Flask(__name__)
 CORS(app)
+
+# ---------------------------------------------------------
+# 1) NALAGANJE MODELA IN ENCODERJA
+# ---------------------------------------------------------
+try:
+    bundle = joblib.load("model_bundle.pkl")
+    model = bundle["model"]
+    encoder_tema = bundle["encoder_tema"]
+    print("✅ Model uspešno naložen.")
+except Exception as e:
+    print(f"❌ Napaka pri nalaganju modela: {e}")
+
+# ---------------------------------------------------------
+# 2) POMOŽNE FUNKCIJE ZA NLP IN PREDIKCIJO
+# ---------------------------------------------------------
+
+def extract_themes_from_text(text):
+    text = text.lower()
+    themes = []
+    if any(w in text for w in ["ai", "umetna inteligenca", "machine learning", "strojno učenje"]):
+        themes.append("Umetna inteligenca")
+    if any(w in text for w in ["scratch", "igra", "game", "pygame"]):
+        themes.append("Programiranje iger")
+    if "minecraft" in text:
+        themes.append("Minecraft")
+    if any(w in text for w in ["html", "css", "javascript", "splet", "web"]):
+        themes.append("Razvoj spletnih strani")
+    if any(w in text for w in ["brezplač", "delavnica", "prijava"]):
+        themes.append("Brezplačne delavnice")
+    if any(w in text for w in ["varnost", "phishing", "geslo", "zasebnost"]):
+        themes.append("Varnost na spletu")
+    if "appinventor" in text or "app inventor" in text:
+        themes.append("Appinventor")
+    if any(w in text for w in ["algoritem", "algoritmi", "logika"]):
+        themes.append("Algoritmi")
+    if "python" in text:
+        themes.append("Python")
+    
+    return themes if themes else ["Drugo"]
+
+def map_user_theme(theme):
+    mapping = {
+        "Programiranje iger": "Programiranje iger",
+        "Algoritmi": "Programiranje iger",
+        "Razvoj spletnih strani": "Razvoj spletnih strani",
+        "Appinventor": "Programiranje iger",
+        "Varnost na spletu": "Varnost na spletu",
+        "Brezplačne delavnice": "Drugo",
+        "Umetna inteligenca": "Umetna inteligenca",
+        "Minecraft": "Minecraft",
+        "Python": "Python"
+    }
+    return mapping.get(theme, "Drugo")
+
+def get_numeric_age(group_str):
+    """Pretvori npr. '7-9' v 7.0 (spodnja meja, kot v treningu)."""
+    try:
+        return float(group_str.split('-')[0])
+    except:
+        return 10.0 # Default če pride do napake
+
+def predict_reach(text, age_group):
+    # 1. Izlušči in mapiraj teme
+    detected = extract_themes_from_text(text)
+    mapped = [map_user_theme(t) for t in detected]
+    
+    # 2. One-hot encoding (pazi: transform pričakuje 2D array)
+    tema_encoded = encoder_tema.transform(np.array(mapped).reshape(-1, 1))
+    
+    # Če je več tem, jih seštejemo v en vektor (tako kot v tvojem trening skriptu)
+    tema_vector = tema_encoded.sum(axis=0).reshape(1, -1)
+    
+    # 3. Starost
+    age_val = get_numeric_age(age_group)
+    starost_vector = np.array([[age_val]])
+    
+    # 4. Združi v X in napovej
+    X_input = np.hstack([tema_vector, starost_vector])
+    prediction = model.predict(X_input)[0]
+    
+    return max(0, int(round(prediction))) # Preprečimo negativne številke
+
+# ---------------------------------------------------------
+# 3) GEMINI KONFIGURACIJA
+# ---------------------------------------------------------
+api_key = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
 
 class Categorizer:
     @staticmethod
     def get_context(group, topic):
         target = "Mame (35-44)" if group in ["7-9", "10-12"] else "Starši in mladi"
         mapping = {
-            "7-9":   {"subgroup": "Scratch",               "target": target,          "platform": "Instagram"},
-            "10-12": {"subgroup": "Minecraft Education",   "target": target,          "platform": "Facebook"},
-            "13-15": {"subgroup": "Python",                "target": target,          "platform": "Facebook"},
-            "16":    {"subgroup": "Umetna inteligenca",    "target": "Mladi in starši","platform": "Instagram"}
+            "7-9":   {"subgroup": "Scratch",           "target": target, "platform": "Instagram"},
+            "10-12": {"subgroup": "Minecraft Education", "target": target, "platform": "Facebook"},
+            "13-15": {"subgroup": "Python",            "target": target, "platform": "Facebook"},
+            "16":    {"subgroup": "Umetna inteligenca", "target": "Mladi in starši", "platform": "Instagram"}
         }
         return mapping.get(group, {"subgroup": "Splošno", "target": "Starši", "platform": "Facebook"})
 
-
 class AIModel:
     @staticmethod
-    def get_examples_from_csv():
-        """
-        Prebere pretekle objave iz datoteke Objave_mar2025_mar2026_FB.csv.
-        """
-        examples = []
-        try:
-            with open('Objave_mar2025_mar2026_FB.csv', mode='r', encoding='utf-8') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    post_text = row.get('Naziv')
-                    if post_text and len(post_text.strip()) > 50:
-                        examples.append(post_text.strip())
-                    if len(examples) >= 3:
-                        break
-        except Exception as e:
-            print(f"Opozorilo pri branju Objave CSV: {e}")
-        return examples
-    
-    @staticmethod
-    def get_ads_data_from_csv():
-        """
-        Prebere in parsa podatke o uspešnosti oglasov iz Oglasi.csv.
-        """
-        ads_data = []
-        try:
-            with open('Oglasi.csv', mode='r', encoding='utf-8') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    ads_data.append({
-                        'Platforma': row.get('Platforma'),
-                        'CTR': row.get('CTR_platform'),
-                        'Budget': row.get('budget_platform (EUR)'),
-                        'Clicks': row.get('Clicks_platform'),
-                        'CPC': row.get('CPC_platform (EUR)')
-                    })
-        except Exception as e:
-            print(f"Opozorilo pri branju Oglasi.csv: {e}")
-        return ads_data
-    
-    @staticmethod
-    def generate(context, topic):
-        # Ustvarimo poziv (prompt) za model
+    def generate(context, topic, description):
         prompt = (
             f"Napiši privlačno objavo za družbena omrežja za šolo programiranja Coding Giants. "
             f"Ciljna skupina so {context['target']}. "
             f"Tema objave je {topic}, otroci pa se bodo učili preko modula {context['subgroup']}. "
-            f"Vključi nekaj emojijev in bodi spodbuden. Odgovori izključno v slovenščini."
+            f"Vključi nekaj emojijev in bodi spodbuden. Odgovori izključno v slovenščini. "
+            f"Samo napiši besedilo objave brez uvodnih besed. "
+            f"Dodatno upoštevaj navodilo uporabnika: {description}"
         )
         
         try:
-            response = chat(model='gemma2:9b', messages=[
-                {
-                    'role': 'user',
-                    'content': prompt,
-                },
-            ])
-            
-            text = response.message.content
+            response = client.models.generate_content(
+                model="gemini-3-flash-preview", # Uporabi stabilno verzijo
+                contents=prompt
+            )
+            text = response.text
         except Exception as e:
-            text = f"Generiranje ni uspelo. Dragi starši, vaš otrok bo užival v temi {topic} skozi {context['subgroup']}!"
+            print(f"Napaka Gemini: {e}")
+            text = f"Pridružite se nam na delavnici {topic}! 🚀"
 
         image_url = f"https://placehold.co/600x400?text=Coding+Giants+{context['subgroup'].replace(' ', '+')}"
         return text, image_url
 
-
-class Predictor:
-    @staticmethod
-    def get_csv_based_reach(platform, subgroup):
-        base_metrics = {
-            "Facebook":   {"clicks": 85, "interactions": 15},
-            "Instagram": {"clicks": 25, "interactions": 10}
-        }
-        stats = base_metrics.get(platform, base_metrics["Facebook"])
-        multiplier = 45
-        topic_boost = 1.3 if subgroup == "Minecraft Education" else 1.0
-        reach = (stats['clicks'] + stats['interactions']) * multiplier * topic_boost
-        return int(reach * random.uniform(0.9, 1.1))
-
+# ---------------------------------------------------------
+# 4) POTI (ROUTES)
+# ---------------------------------------------------------
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def login_page():
+    # To bo odprlo login.html ob obisku http://127.0.0.1:5000
+    return render_template('login.html')
 
+@app.route('/index.html')
+def index_page():
+    # To je stran, na katero te vrže JS funkcija
+    return render_template('index.html')
 
 @app.route('/generate', methods=['POST'])
 def generate_post():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"error": "Ni podatkov v zahtevi."}), 400
+            return jsonify({"error": "Ni podatkov."}), 400
 
         group = data.get('group')
         topic = data.get('topic', '').strip()
+        description = data.get('description', '')
 
         if not group or not topic:
             return jsonify({"error": "Manjka skupina ali tema."}), 400
 
+        # Pridobi kontekst za Gemini
         context = Categorizer.get_context(group, topic)
-        text, img = AIModel.generate(context, topic)
-        reach = Predictor.get_csv_based_reach(context['platform'], context['subgroup'])
-
-        reach_formatted = f"{reach:,}".replace(',', '.')
+        
+        # 1. Generiraj besedilo z AI
+        generated_text, img_url = AIModel.generate(context, topic, description)
+        
+        # 2. Napovej doseg z XGBoost modelom
+        reach_val = predict_reach(generated_text, group)
+        reach_formatted = f"{reach_val:,}".replace(',', '.')
 
         return jsonify({
-            "text": text,
-            "image": img,
+            "text": generated_text,
+            "image": img_url,
             "reach": f"Pričakovan doseg ({context['platform']}): {reach_formatted} uporabnikov",
             "context": context
         })
@@ -135,7 +180,6 @@ def generate_post():
     except Exception as e:
         app.logger.error(f"Napaka v /generate: {e}")
         return jsonify({"error": f"Strežniška napaka: {str(e)}"}), 500
-
 
 if __name__ == '__main__':
     app.run(debug=True)
