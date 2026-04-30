@@ -95,25 +95,12 @@ def predict_reach(text, age_group):
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
-class Categorizer:
-    @staticmethod
-    def get_context(group, topic):
-        target = "Mame (35-44)" if group in ["7-9", "10-12"] else "Starši in mladi"
-        mapping = {
-            "7-9":   {"subgroup": "Scratch",           "target": target, "platform": "Instagram"},
-            "10-12": {"subgroup": "Minecraft Education", "target": target, "platform": "Facebook"},
-            "13-15": {"subgroup": "Python",            "target": target, "platform": "Facebook"},
-            "16":    {"subgroup": "Umetna inteligenca", "target": "Mladi in starši", "platform": "Instagram"}
-        }
-        return mapping.get(group, {"subgroup": "Splošno", "target": "Starši", "platform": "Facebook"})
-
 class AIModel:
     @staticmethod
-    def generate(context, topic, description):
+    def generate(topic, description, time, mood, length):
         prompt = (
             f"Napiši privlačno objavo za družbena omrežja za šolo programiranja Coding Giants. "
-            f"Ciljna skupina so {context['target']}. "
-            f"Tema objave je {topic}, otroci pa se bodo učili preko modula {context['subgroup']}. "
+            f"Tema objave je {topic}, upoštevaj da je {time} in naj je v {mood} razpoloženju. Naj je dolgo {length}"
             f"Vključi nekaj emojijev in bodi spodbuden. Odgovori izključno v slovenščini. "
             f"Samo napiši besedilo objave brez uvodnih besed. "
             f"Dodatno upoštevaj navodilo uporabnika: {description}"
@@ -129,7 +116,7 @@ class AIModel:
             print(f"Napaka Gemini: {e}")
             text = f"Pridružite se nam na delavnici {topic}! 🚀"
 
-        image_url = f"https://placehold.co/600x400?text=Coding+Giants+{context['subgroup'].replace(' ', '+')}"
+        image_url = f""
         return text, image_url
 
 # ---------------------------------------------------------
@@ -156,15 +143,16 @@ def generate_post():
         group = data.get('group')
         topic = data.get('topic', '').strip()
         description = data.get('description', '')
+        time = data.get("time", "")
+        mood = data.get("mood", "")
+        length = data.get("length", "")
 
         if not group or not topic:
             return jsonify({"error": "Manjka skupina ali tema."}), 400
 
-        # Pridobi kontekst za Gemini
-        context = Categorizer.get_context(group, topic)
         
         # 1. Generiraj besedilo z AI
-        generated_text, img_url = AIModel.generate(context, topic, description)
+        generated_text, img_url = AIModel.generate(topic, description, time, mood, length)
         
         # 2. Napovej doseg z XGBoost modelom
         reach_val = predict_reach(generated_text, group)
@@ -173,8 +161,7 @@ def generate_post():
         return jsonify({
             "text": generated_text,
             "image": img_url,
-            "reach": f"Pričakovan doseg ({context['platform']}): {reach_formatted} uporabnikov",
-            "context": context
+            "reach": f"Pričakovan doseg: {reach_formatted} uporabnikov"
         })
 
     except Exception as e:

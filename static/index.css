@@ -12,6 +12,10 @@ body {
     padding-top: 80px;
 }
 
+.login_wrapper {
+    margin: 0 auto;
+}
+
 /* --- Navigacijska vrstica --- */
 .navbar {
     position: fixed;
@@ -37,8 +41,7 @@ body {
 
 /* --- Glavni kontejner (Kartica) --- */
 .main-container {
-    max-width: 600px;
-    /* Povečano za generator, na loginu bo še vedno ok */
+    max-width: 1200px;
     width: 90%;
     padding: 30px;
     background-color: #ffffff;
@@ -50,7 +53,6 @@ body {
     margin-bottom: 40px;
 }
 
-/* --- Vnosna polja in elementi --- */
 h2 {
     color: #ff8c00;
     text-align: center;
@@ -156,4 +158,45 @@ button:hover {
 
 #topics-container label {
     font-weight: normal;
+}
+
+#post_text {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+#topics-container {
+    display: block;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* layout za checkboxe v topics */
+#topics-container label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* description naj zavzame celotno širino grida */
+.full-width {
+    grid-column: span 3;
 }

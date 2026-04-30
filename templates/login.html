@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="sl">
+
 <head>
     <meta charset="UTF-8">
     <title>Prijava</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
+
 <body>
 
     <div class="main-container">
         <h2>Prijava</h2>
-        
-        <div id="error" class="error-msg" style="display: none;">Napačno uporabniško ime ali geslo!</div>
+        <div class="login_wrapper">
 
-        <label for="username">Uporabniško ime</label>
-        <input type="text" id="username" placeholder="Vnesi '1'">
+            <div id="error" class="error-msg" style="display: none;">Napačno uporabniško ime ali geslo!</div>
 
-        <label for="password">Geslo</label>
-        <input type="password" id="password" placeholder="Vnesi '1'">
+            <label for="username">Uporabniško ime</label>
+            <input type="text" id="username" placeholder="Vnesi '1'">
 
-        <button onclick="checkLogin()">Prijavi se</button>
+            <label for="password">Geslo</label>
+            <input type="password" id="password" placeholder="Vnesi '1'">
+
+            <button onclick="checkLogin()">Prijavi se</button>
+        </div>
     </div>
 
     <script>
@@ -35,4 +39,5 @@
         }
     </script>
 </body>
+
 </html>
