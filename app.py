@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 import joblib
 import os
 import numpy as np
+import pandas as pd
+import random
 from google import genai
 from flask_cors import CORS
 
@@ -18,6 +20,14 @@ try:
     print("✅ Model uspešno naložen.")
 except Exception as e:
     print(f"❌ Napaka pri nalaganju modela: {e}")
+    
+try:
+    df_posts = pd.read_csv("objave_mar2025_mar2026_FB.csv")
+    fifth_column = df_posts.iloc[:, 4].dropna().tolist()  # 5. stolpec (index 4)
+    print("✅ CSV uspešno naložen.")
+except Exception as e:
+    print(f"❌ Napaka pri branju CSV: {e}")
+    fifth_column = []
 
 # ---------------------------------------------------------
 # 2) POMOŽNE FUNKCIJE ZA NLP IN PREDIKCIJO
@@ -98,11 +108,13 @@ client = genai.Client(api_key=api_key)
 class AIModel:
     @staticmethod
     def generate(topic, description, time, mood, length, platform):
+        example_post = random.choice(fifth_column) if fifth_column else ""
         prompt = (
             f"Napiši privlačno objavo za družbena omrežja za šolo programiranja Coding Giants. "
             f"Tema objave je {topic}, upoštevaj da je {time} in naj je v {mood} razpoloženju. Naj je dolgo {length}. Imej v mislih, daje objava za {platform}."
             f"Vključi nekaj emojijev in bodi spodbuden. Odgovori izključno v slovenščini. "
             f"Samo napiši besedilo objave brez uvodnih besed. "
+            f"Navdih naj bo tudi iz tega primera: {example_post}"
             f"Dodatno upoštevaj navodilo uporabnika: {description}"
         )
         
