@@ -74,6 +74,14 @@
                 <label><input type="checkbox" name="topic" value="Python"> Python</label>
             </div>
 
+            <div class="form-group">
+                <label for="platforma">Platforma objave:</label>
+                <select id="platforma">
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                </select>
+            </div>
+
         </div>
 
 
@@ -119,6 +127,7 @@
             const moodVal = document.getElementById("mood").value;
             const timeVal = document.getElementById("time").value;
             const lengthVal = document.getElementById("length").value;
+            const platformVal = document.getElementById("platforma").value;
 
             const selectedTopics = Array.from(document.querySelectorAll('input[name="topic"]:checked'))
                 .map(cb => cb.value);
@@ -140,7 +149,8 @@
                         description: description,
                         mood: moodVal,
                         time: timeVal,
-                        length: lengthVal
+                        length: lengthVal,
+                        platform: platformVal
                     })
                 });
 

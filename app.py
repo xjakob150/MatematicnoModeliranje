@@ -97,10 +97,10 @@ client = genai.Client(api_key=api_key)
 
 class AIModel:
     @staticmethod
-    def generate(topic, description, time, mood, length):
+    def generate(topic, description, time, mood, length, platform):
         prompt = (
             f"Napiši privlačno objavo za družbena omrežja za šolo programiranja Coding Giants. "
-            f"Tema objave je {topic}, upoštevaj da je {time} in naj je v {mood} razpoloženju. Naj je dolgo {length}"
+            f"Tema objave je {topic}, upoštevaj da je {time} in naj je v {mood} razpoloženju. Naj je dolgo {length}. Imej v mislih, daje objava za {platform}."
             f"Vključi nekaj emojijev in bodi spodbuden. Odgovori izključno v slovenščini. "
             f"Samo napiši besedilo objave brez uvodnih besed. "
             f"Dodatno upoštevaj navodilo uporabnika: {description}"
@@ -146,13 +146,14 @@ def generate_post():
         time = data.get("time", "")
         mood = data.get("mood", "")
         length = data.get("length", "")
+        platform = data.get("platform","")
 
         if not group or not topic:
             return jsonify({"error": "Manjka skupina ali tema."}), 400
 
         
         # 1. Generiraj besedilo z AI
-        generated_text, img_url = AIModel.generate(topic, description, time, mood, length)
+        generated_text, img_url = AIModel.generate(topic, description, time, mood, length, platform)
         
         # 2. Napovej doseg z XGBoost modelom
         reach_val = predict_reach(generated_text, group)
