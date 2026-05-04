@@ -22,7 +22,7 @@ except Exception as e:
     print(f"❌ Napaka pri nalaganju modela: {e}")
     
 try:
-    df_posts = pd.read_csv("objave_mar2025_mar2026_FB.csv")
+    df_posts = pd.read_csv("Objave_mar2025_mar2026_FB.csv")
     fifth_column = df_posts.iloc[:, 4].dropna().tolist()  # 5. stolpec (index 4)
     print("✅ CSV uspešno naložen.")
 except Exception as e:
