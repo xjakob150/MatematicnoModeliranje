@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import joblib
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import numpy as np
 import pandas as pd
 import random
@@ -9,6 +11,8 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv()
 
 # ---------------------------------------------------------
 # 1) NALAGANJE MODELA IN ENCODERJA
@@ -103,6 +107,10 @@ def predict_reach(text, age_group):
 # 3) GEMINI KONFIGURACIJA
 # ---------------------------------------------------------
 api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise Exception("Missing GEMINI_API_KEY in .env")
+
 client = genai.Client(api_key=api_key)
 
 class AIModel:
