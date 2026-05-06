@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import joblib
 import os
 from dotenv import load_dotenv
-load_dotenv()
 import numpy as np
 import pandas as pd
 import random
