@@ -11,4 +11,3 @@ wheel
 setuptools
 python-dotenv
 mysql-connector-python
-mariadb
