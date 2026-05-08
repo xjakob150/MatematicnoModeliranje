@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import joblib
+import mysql.connector
 import os
 from dotenv import load_dotenv
 import numpy as np
@@ -10,6 +11,14 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
+def connect_to_db():
+    return mysql.connector.connect(
+        host=os.getenv('DB_HOST', 'db'),
+        user=os.getenv('DB_USER', 'root'),
+        password='',
+        database=os.getenv('DB_NAME', 'matematicnomodeliranje')
+    )
 
 load_dotenv()
 

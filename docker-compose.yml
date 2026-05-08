@@ -1,31 +1,24 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  web:
-    build: .
-    container_name: flaskapp
-    ports:
-      - "5000:5000"
-    environment:
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-    depends_on:
-      - db
-
   db:
-    image: mariadb:latest
-    container_name: mariadb
+    image: mariadb:10.6
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: flaskdb
+      MARIADB_DATABASE: matematicnomodeliranje
+      MARIADB_ALLOW_EMPTY_PASSWORD: "yes" 
+    volumes:
+      - ./matematicnomodeliranje.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
 
-volumes:
-  db_data:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=matematicnomodeliranje
+      - DB_USER=root
