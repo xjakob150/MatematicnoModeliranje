@@ -9,18 +9,48 @@ import random
 from google import genai
 from flask_cors import CORS
 
+import mysql.connector
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import datetime
+from functools import wraps
+
+
 app = Flask(__name__)
 CORS(app)
 
-def connect_to_db():
-    return mysql.connector.connect(
-        host=os.getenv('DB_HOST', 'db'),
-        user=os.getenv('DB_USER', 'root'),
-        password='',
-        database=os.getenv('DB_NAME', 'matematicnomodeliranje')
-    )
 
 load_dotenv()
+
+
+# ---------------------------------------------------------
+# JWT PREVERJANJE TOKENA (dodal merih)
+# ---------------------------------------------------------
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "skritiKljuc")
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            return jsonify({"napaka": "Token manjka"}), 401
+
+        try:
+            token = auth_header.split(" ")[1]
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            request.uporabnik_id = data["id_uporabnika"]
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"napaka": "Token je potekel"}), 401
+
+        except:
+            return jsonify({"napaka": "Token ni veljaven"}), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
 
 # ---------------------------------------------------------
 # 1) NALAGANJE MODELA IN ENCODERJA
@@ -162,9 +192,10 @@ def index_page():
     return render_template('index.html')
 
 @app.route('/generate', methods=['POST'])
+@token_required # dodal merih da preverja jwt
 def generate_post():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         if not data:
             return jsonify({"error": "Ni podatkov."}), 400
 
@@ -196,6 +227,97 @@ def generate_post():
     except Exception as e:
         app.logger.error(f"Napaka v /generate: {e}")
         return jsonify({"error": f"Strežniška napaka: {str(e)}"}), 500
+
+# ---------------------------------------------------------
+#  LOGIN/REGISTRACIJSKA STRAN (dodal merih)
+# ---------------------------------------------------------
+
+# Povezava na bazo
+def povezava():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="root",          
+        database="matematicnomodeliranje"
+    )
+
+@app.route("/registracija", methods = ["POST"])
+def registracija():
+    data = request.get_json()
+
+    ime = data.get("ime")
+    priimek = data.get("priimek")
+    email = data.get("email")
+    geslo = data.get("geslo")
+
+    if not ime or not priimek or not email or not geslo:
+        return jsonify({"Napaka" : "Manjkajo podatki"}), 400
+    
+    geslo_hash = generate_password_hash(geslo)
+
+    conn = povezava()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM uporabnik WHERE email = %s", (email,) )
+    obstojec = cursor.fetchone()
+
+    if obstojec:
+        cursor.close()
+        conn.close()
+        return jsonify({"napaka": "Uporabnik s tem emailom že obstaja"}), 409
+    
+    cursor.execute("""
+        INSERT INTO uporabnik (ime,priimek, email, geslo)
+        VALUES (%s, %s, %s, %s)
+    """, (ime, priimek, email, geslo_hash))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"sporocilo": "Registracija uspešna"}), 201
+
+
+@app.route("/prijava", methods=["POST"])
+def prijava():
+    data = request.get_json()
+
+    email = data.get("email")
+    geslo = data.get("geslo")
+
+    if not email or not geslo:
+        return jsonify({"napaka": "Vnesi email in geslo"}), 400
+    
+    conn = povezava()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM uporabnik WHERE email = %s", (email,))
+    uporabnik = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if uporabnik and check_password_hash(uporabnik["geslo"], geslo):
+        token = jwt.encode({
+            "id_uporabnika": uporabnik["id_uporabnika"],
+            "email": uporabnik["email"],
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+        }, SECRET_KEY, algorithm="HS256")
+
+        return jsonify({
+            "sporocilo": "Prijava uspešna",
+            "token": token
+        }), 200
+
+    return jsonify({"napaka": "Napačen email ali geslo"}), 401
+
+@app.route("/registracija-stran")
+def registracija_stran():
+    return render_template("registracija.html")
+
+@app.route("/prijava-stran")
+def prijava_stran():
+    return render_template("prijava.html")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

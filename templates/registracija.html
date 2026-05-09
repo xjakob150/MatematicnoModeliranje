@@ -2,16 +2,23 @@
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
-    <title>Prijava</title>
+    <title>Registracija</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 
 <body>
 <div class="main-container">
-    <h2>Prijava</h2>
+    <h2>Registracija</h2>
 
     <div class="login_wrapper">
         <div id="error" class="error-msg" style="display:none;"></div>
+        <div id="success" class="success-msg" style="display:none;"></div>
+
+        <label for="ime">Ime</label>
+        <input type="text" id="ime" placeholder="Vnesi ime">
+
+        <label for="priimek">Priimek</label>
+        <input type="text" id="priimek" placeholder="Vnesi priimek">
 
         <label for="email">Email</label>
         <input type="email" id="email" placeholder="Vnesi email">
@@ -19,29 +26,36 @@
         <label for="geslo">Geslo</label>
         <input type="password" id="geslo" placeholder="Vnesi geslo">
 
-        <button onclick="login()">Prijavi se</button>
+        <button onclick="registracija()">Registriraj se</button>
 
-        <p>Še nimaš računa? <a href="/registracija-stran">Registriraj se</a></p>
+        <p>Že imaš račun? <a href="/">Prijavi se</a></p>
     </div>
 </div>
 
 <script>
-async function login() {
+async function registracija() {
 
+    const ime = document.getElementById("ime").value;
+    const priimek = document.getElementById("priimek").value;
     const email = document.getElementById("email").value;
     const geslo = document.getElementById("geslo").value;
+
     const error = document.getElementById("error");
+    const success = document.getElementById("success");
 
     error.style.display = "none";
+    success.style.display = "none";
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/prijava", {
+        const response = await fetch("http://127.0.0.1:5000/registracija", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
+                ime: ime,
+                priimek: priimek,
                 email: email,
                 geslo: geslo
             })
@@ -51,9 +65,12 @@ async function login() {
 
         if (response.ok) {
 
-            localStorage.setItem("token", data.token);
+            success.innerText = "Registracija uspešna. Zdaj se lahko prijaviš.";
+            success.style.display = "block";
 
-            window.location.href = "/index.html";
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1500);
 
         } else {
 
