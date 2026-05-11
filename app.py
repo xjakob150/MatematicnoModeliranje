@@ -206,6 +206,13 @@ def generate_post():
         mood = data.get("mood", "")
         length = data.get("length", "")
         platform = data.get("platform","")
+        
+        if(platform == "facebook"):
+            platform = 1
+        elif(platform == "instagram"):  
+            platform = 2
+
+        uporabnik_id = request.uporabnik_id
 
         if not group or not topic:
             return jsonify({"error": "Manjka skupina ali tema."}), 400
@@ -217,6 +224,41 @@ def generate_post():
         # 2. Napovej doseg z XGBoost modelom
         reach_val = predict_reach(generated_text, group)
         reach_formatted = f"{reach_val:,}".replace(',', '.')
+        
+        # ---------------------------------------------------------
+        # SHRANJEVANJE V BAZO
+        # ---------------------------------------------------------
+        try:
+            conn = povezava()
+            cursor = conn.cursor()
+            
+            sql = """
+                INSERT INTO generiranje_oglasa 
+                (id_uporabnika, opis_objave, predviden_doseg, teme_objave, id_platforme, casovno_obdobje, razpolozenje_objave, starostna_skupina, dolzina_objave, datum_ustvarjanja) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                uporabnik_id, 
+                generated_text, 
+                reach_val, 
+                topic, 
+                platform,
+                time, 
+                mood,
+                group,
+                length,
+                datetime.datetime.now()
+            )
+            
+            cursor.execute(sql, values)
+            conn.commit()
+            
+            cursor.close()
+            conn.close()
+            print("✅ Oglas uspešno shranjen v bazo.")
+        except Exception as db_e:
+            print(f"❌ Napaka pri shranjevanju v bazo: {db_e}")
+        # ---------------------------------------------------------
 
         return jsonify({
             "text": generated_text,
@@ -310,6 +352,32 @@ def prijava():
         }), 200
 
     return jsonify({"napaka": "Napačen email ali geslo"}), 401
+
+@app.route('/zgodovina', methods=['GET'])
+@token_required
+def dobi_zgodovino():
+    try:
+        uporabnik_id = request.uporabnik_id
+        conn = povezava()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Pridobimo zadnjih 10 objav
+        query = """
+            SELECT id_oglasa, teme_objave, opis_objave, datum_ustvarjanja 
+            FROM generiranje_oglasa 
+            WHERE id_uporabnika = %s 
+            ORDER BY datum_ustvarjanja DESC 
+            LIMIT 10
+        """
+        cursor.execute(query, (uporabnik_id,))
+        rezultati = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(rezultati), 200
+    except Exception as e:
+        return jsonify({"napaka": str(e)}), 500
 
 @app.route("/registracija-stran")
 def registracija_stran():

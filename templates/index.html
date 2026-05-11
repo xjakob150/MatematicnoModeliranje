@@ -6,161 +6,270 @@
     <title>Generator | Coding Giants</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Prilagoditev za lepši scrollbar pri temah */
+        /* Scrollbar styling */
+        #history-container::-webkit-scrollbar { width: 4px; }
+        #history-container::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
+        
         #topics-container::-webkit-scrollbar { width: 5px; }
         #topics-container::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
+
+        .truncate-2-lines {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Gladek prehod za sidebar in vsebino */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+        }
+
+        /* Mobilne nastavitve - čisto belo ozadje, brez card izgleda */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 100vw;
+                background-color: white !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .history-item {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                border-left-width: 4px !important;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-orange-100 via-orange-50 to-slate-200 font-sans pt-16 sm:pt-24">
+<body class="min-h-screen bg-gradient-to-br from-orange-100 via-orange-50 to-slate-200 font-sans overflow-x-hidden">
 
-    <nav class="fixed top-0 left-0 w-full h-16 bg-white/90 backdrop-blur-md shadow-sm flex items-center justify-between px-6 z-50">
-        <div class="flex items-center gap-2">
-            <span class="text-orange-500 font-bold text-xl">&lt;/&gt;</span>
-            <span class="font-bold text-gray-700">Ad Generator</span>
+    <nav class="fixed top-0 left-0 w-full h-16 bg-white shadow-sm flex items-center justify-between px-6 z-[110] border-b border-orange-100">
+        <div class="flex items-center gap-4">
+            <button onclick="toggleSidebar()" class="p-2 hover:bg-orange-50 rounded-lg text-orange-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="text-orange-500 font-bold text-xl">&lt;/&gt;</span>
+                <span class="font-bold text-gray-700">Ad Generator</span>
+            </div>
         </div>
         <button onclick="logout()" class="text-sm font-semibold text-gray-500 hover:text-orange-600 transition-colors">Odjava</button>
     </nav>
 
-    <main class="w-full max-w-4xl mx-auto bg-white p-6 sm:p-10 sm:rounded-2xl shadow-none sm:shadow-2xl border-none sm:border border-orange-100 mb-0 sm:mb-10">
+    <div class="flex min-h-screen pt-16">
         
-        <div class="text-center mb-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-orange-500">Generiranje objave</h2>
-            <div class="h-1 w-20 bg-orange-500 mx-auto mt-2 rounded-full"></div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Izberite starostno skupino:</label>
-                    <select id="group" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
-                        <option value="7-9">7-9 let</option>
-                        <option value="10-12">10-12 let</option>
-                        <option value="13-15">13-15 let</option>
-                        <option value="16">16+ let</option>
-                    </select>
+        <aside id="sidebar" class="sidebar-transition fixed left-0 w-80 bg-white border-r border-orange-100 h-[calc(100vh-64px)] overflow-y-auto z-[100] transform translate-x-0">
+            <div class="p-6 bg-white min-h-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-gray-700 flex items-center gap-2">
+                        <span>🕒</span> Pretekle objave
+                    </h3>
+                    <button onclick="toggleSidebar()" class="md:hidden text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="history-container" class="space-y-0 pb-10">
+                    </div>
+            </div>
+        </aside>
+
+        <main id="main-content" class="sidebar-transition flex-1 p-4 sm:p-10 w-full ml-0 md:ml-80">
+            <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 sm:rounded-2xl shadow-none sm:shadow-2xl border-none sm:border border-orange-100">
+                
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-orange-500">Generiranje objave</h2>
+                    <div class="h-1 w-20 bg-orange-500 mx-auto mt-2 rounded-full"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Izberite starostno skupino:</label>
+                            <select id="group" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50">
+                                <option value="7">7-9 let</option>
+                                <option value="10">10-12 let</option>
+                                <option value="13">13-15 let</option>
+                                <option value="16">16+ let</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Izberite teme objave:</label>
+                            <div id="topics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-56 overflow-y-auto shadow-inner">
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Umetna inteligenca" class="w-5 h-5 accent-orange-500"> Umetna inteligenca
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Programiranje iger" class="w-5 h-5 accent-orange-500"> Programiranje iger
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Minecraft" class="w-5 h-5 accent-orange-500"> Minecraft
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Razvoj spletnih strani" class="w-5 h-5 accent-orange-500"> Spletne strani
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Brezplačne delavnice" class="w-5 h-5 accent-orange-500"> Delavnice
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Varnost na spletu" class="w-5 h-5 accent-orange-500"> Varnost
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Appinventor" class="w-5 h-5 accent-orange-500"> Appinventor
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Algoritmi" class="w-5 h-5 accent-orange-500"> Algoritmi
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600">
+                                    <input type="checkbox" name="topic" value="Python" class="w-5 h-5 accent-orange-500"> Python
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Razpoloženje:</label>
+                                <select id="mood" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50">
+                                    <option value="veselo">Veselo</option>
+                                    <option value="motivacijsko">Motivacijsko</option>
+                                    <option value="resno">Resno</option>
+                                    <option value="igrivo">Igrivo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Dolžina:</label>
+                                <select id="length" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50">
+                                    <option value="kratko">Kratko</option>
+                                    <option value="srednje">Srednje</option>
+                                    <option value="dolgo">Dolgo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Časovno obdobje:</label>
+                                <select id="time" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50">
+                                    <option value="poletje">Poletje</option>
+                                    <option value="zime">Zima</option>
+                                    <option value="jesen">Jesen</option>
+                                    <option value="pomlad">Pomlad</option>
+                                    <option value="splošno">Splošno</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Platforma:</label>
+                                <select id="platforma" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50">
+                                    <option value="facebook">Facebook</option>
+                                    <option value="instagram">Instagram</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Dodatna navodila:</label>
+                            <textarea id="description" rows="3" placeholder="Opiši kaj želiš v objavi..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50"></textarea>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Izberite teme objave:</label>
-                    <div id="topics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-56 overflow-y-auto shadow-inner">
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Umetna inteligenca" class="w-5 h-5 accent-orange-500"> Umetna inteligenca
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Programiranje iger" class="w-5 h-5 accent-orange-500"> Programiranje iger
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Minecraft" class="w-5 h-5 accent-orange-500"> Minecraft
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Razvoj spletnih strani" class="w-5 h-5 accent-orange-500"> Spletne strani
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Brezplačne delavnice" class="w-5 h-5 accent-orange-500"> Delavnice
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Varnost na spletu" class="w-5 h-5 accent-orange-500"> Varnost
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Appinventor" class="w-5 h-5 accent-orange-500"> Appinventor
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Algoritmi" class="w-5 h-5 accent-orange-500"> Algoritmi
-                        </label>
-                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
-                            <input type="checkbox" name="topic" value="Python" class="w-5 h-5 accent-orange-500"> Python
-                        </label>
+                <button onclick="generate()" id="btn-generate" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg mt-8 transition-all active:scale-95 text-lg">
+                    Generiraj objavo ✨
+                </button>
+
+                <div id="preview" class="mt-10 p-4 sm:p-8 bg-orange-50 sm:rounded-2xl border-t border-b sm:border border-orange-200 hidden text-center">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 italic">Zgenerirana vsebina:</h3>
+                    <textarea id="post-text" rows="10" class="w-full p-5 bg-white border border-orange-100 rounded-2xl text-gray-700 outline-none shadow-inner leading-relaxed text-left" readonly></textarea>
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mt-6">
+                        <strong id="post-reach" class="text-orange-700 bg-white px-4 py-2 rounded-lg shadow-sm border border-orange-100 text-sm font-bold"></strong>
+                        <div class="flex gap-3 justify-center">
+                            <button onclick="enableEdit()" class="px-5 py-2 bg-white border border-gray-200 rounded-xl font-bold hover:bg-gray-50 shadow-sm">Uredi</button>
+                            <button onclick="copyPost()" class="px-5 py-2 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 shadow-sm transition-colors">Kopiraj</button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Razpoloženje:</label>
-                        <select id="mood" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
-                            <option value="veselo">Veselo</option>
-                            <option value="motivacijsko">Motivacijsko</option>
-                            <option value="resno">Resno</option>
-                            <option value="igrivo">Igrivo</option>
-                            <option value="profesionalno">Profesionalno</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Dolžina:</label>
-                        <select id="length" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
-                            <option value="kratko">Kratko</option>
-                            <option value="srednje">Srednje</option>
-                            <option value="dolgo">Dolgo</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Časovno obdobje:</label>
-                        <select id="time" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
-                            <option value="poletje">Poletje</option>
-                            <option value="zime">Zima</option>
-                            <option value="jesen">Jesen</option>
-                            <option value="Pomlad">Pomlad</option>
-                            <option value="Ne_vkljuci">Ne vključi</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Platforma:</label>
-                        <select id="platforma" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
-                            <option value="instagram">Instagram</option>
-                            <option value="facebook">Facebook</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Opis objave:</label>
-                    <textarea id="description" rows="3" placeholder="Opiši kaj želiš v objavi..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base"></textarea>
-                </div>
-            </div>
-        </div>
-
-        <button onclick="generate()" id="btn-generate" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-200 transition-all active:scale-95 mt-8 text-lg">
-            Generiraj predogled ✨
-        </button>
-
-        <div id="preview" class="mt-10 p-4 sm:p-8 bg-orange-50 sm:rounded-2xl border-t border-b sm:border border-orange-200 hidden">
-            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <span>Končni predogled</span>
-            </h3>
-            <textarea id="post-text" rows="12" class="w-full p-5 bg-white border border-orange-100 rounded-2xl text-gray-700 outline-none text-base leading-relaxed shadow-inner" readonly></textarea>
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mt-6">
-                <strong id="post-reach" class="text-orange-700 text-center sm:text-left bg-white px-4 py-2 rounded-lg shadow-sm"></strong>
-                <div class="flex justify-center gap-3">
-                    <button onclick="enableEdit()" class="flex-1 sm:flex-none px-6 py-3 bg-white border border-gray-200 rounded-xl font-bold hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm">Uredi</button>
-                    <button onclick="copyPost()" class="flex-1 sm:flex-none px-6 py-3 bg-orange-100 text-orange-700 border border-orange-200 rounded-xl font-bold hover:bg-orange-200 active:bg-orange-300 transition-colors shadow-sm">Kopiraj</button>
-                </div>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <script>
         const token = localStorage.getItem("token");
         if (!token) window.location.href = "/";
 
+        window.onload = function() {
+            loadHistory();
+            // Na telefonu privzeto skrijemo sidebar, na desktopu pa ga pustimo
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('main-content').classList.remove('md:ml-80');
+            }
+        };
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                if (window.innerWidth >= 768) mainContent.classList.add('md:ml-80');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                if (window.innerWidth >= 768) mainContent.classList.remove('md:ml-80');
+            }
+        }
+
+        async function loadHistory() {
+            const container = document.getElementById("history-container");
+            try {
+                const response = await fetch('http://localhost:5000/zgodovina', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const posts = await response.json();
+
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-gray-400 italic text-center">Ni preteklih objav.</p>';
+                    return;
+                }
+
+                container.innerHTML = posts.map(post => `
+                    <div class="history-item p-4 bg-white border-b md:border md:border-orange-100 md:rounded-xl md:mb-4 hover:bg-orange-50 cursor-pointer transition-all group" 
+                         onclick="viewOldPost(\`${post.opis_objave.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">
+                        <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-1">${post.teme_objave}</p>
+                        <p class="text-sm text-gray-600 truncate-2-lines group-hover:text-gray-900 leading-snug italic">"${post.opis_objave}"</p>
+                        <div class="flex justify-between items-center mt-3">
+                             <p class="text-[10px] text-gray-400 font-bold">${new Date(post.datum_ustvarjanja).toLocaleDateString('sl-SI')}</p>
+                             <span class="text-orange-300 group-hover:text-orange-600">→</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p class="text-xs text-red-400">Napaka pri nalaganju.</p>';
+            }
+        }
+
+        function viewOldPost(text) {
+            const textarea = document.getElementById('post-text');
+            textarea.value = text;
+            document.getElementById('post-reach').innerText = "Arhivirana objava";
+            document.getElementById("preview").classList.remove("hidden");
+            document.getElementById("preview").scrollIntoView({ behavior: 'smooth' });
+            if(window.innerWidth < 768) toggleSidebar();
+        }
+
         async function generate() {
             const btn = document.getElementById("btn-generate");
-            const preview = document.getElementById("preview");
-            
             const selectedTopics = Array.from(document.querySelectorAll('input[name="topic"]:checked')).map(cb => cb.value);
-            if (selectedTopics.length === 0) {
-                alert('Prosimo, izberite vsaj eno temo.');
-                return;
-            }
+            if (selectedTopics.length === 0) { alert('Izberite temo.'); return; }
 
-            btn.disabled = true;
-            btn.innerText = "Generiram... ⏳";
-
+            btn.disabled = true; btn.innerText = "Razmišljam... ⏳";
             const payload = {
                 group: document.getElementById('group').value,
                 topic: selectedTopics.join(", "),
@@ -174,29 +283,19 @@
             try {
                 const response = await fetch('http://localhost:5000/generate', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify(payload)
                 });
-
                 const data = await response.json();
                 if (response.ok) {
-                    const textarea = document.getElementById('post-text');
-                    textarea.value = data.text;
-                    textarea.setAttribute("readonly", true);
+                    document.getElementById('post-text').value = data.text;
                     document.getElementById('post-reach').innerText = data.reach || "";
-                    preview.classList.remove("hidden");
-                    preview.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert("Napaka: " + data.napaka);
+                    document.getElementById("preview").classList.remove("hidden");
+                    document.getElementById("preview").scrollIntoView({ behavior: 'smooth' });
+                    loadHistory();
                 }
-            } catch (error) {
-                alert("Napaka pri povezavi s strežnikom.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Generiraj predogled ✨";
+            } catch (error) { alert("Napaka."); } finally {
+                btn.disabled = false; btn.innerText = "Generiraj objavo ✨";
             }
         }
 
@@ -204,20 +303,14 @@
             const textarea = document.getElementById('post-text');
             textarea.removeAttribute("readonly");
             textarea.focus();
-            textarea.classList.add("ring-2", "ring-orange-500");
+            textarea.classList.add("ring-2", "ring-orange-200");
         }
 
         function copyPost() {
-            const text = document.getElementById('post-text').value;
-            navigator.clipboard.writeText(text)
-                .then(() => alert("Kopirano v odložišče!"))
-                .catch(err => console.error(err));
+            navigator.clipboard.writeText(document.getElementById('post-text').value).then(() => alert("Kopirano!"));
         }
 
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "/";
-        }
+        function logout() { localStorage.removeItem("token"); window.location.href = "/"; }
     </script>
 </body>
 </html>
