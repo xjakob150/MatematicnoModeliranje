@@ -8,8 +8,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Dodamo padding zgoraj, da vsebina ne gre pod fiksno navigacijo */
     padding-top: 80px;
+
 }
 
 .login_wrapper {

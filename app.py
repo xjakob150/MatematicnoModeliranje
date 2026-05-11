@@ -317,7 +317,7 @@ def registracija_stran():
 
 @app.route("/prijava-stran")
 def prijava_stran():
-    return render_template("prijava.html")
+    return render_template("login.html")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

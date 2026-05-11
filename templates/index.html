@@ -1,149 +1,175 @@
 <!DOCTYPE html>
 <html lang="sl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding Giants Generator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <title>Generator | Coding Giants</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Prilagoditev za lepši scrollbar pri temah */
+        #topics-container::-webkit-scrollbar { width: 5px; }
+        #topics-container::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
+    </style>
 </head>
+<body class="min-h-screen bg-gradient-to-br from-orange-100 via-orange-50 to-slate-200 font-sans pt-16 sm:pt-24">
 
-<body>
-    <div class="main-container">
+    <nav class="fixed top-0 left-0 w-full h-16 bg-white/90 backdrop-blur-md shadow-sm flex items-center justify-between px-6 z-50">
+        <div class="flex items-center gap-2">
+            <span class="text-orange-500 font-bold text-xl">&lt;/&gt;</span>
+            <span class="font-bold text-gray-700">Ad Generator</span>
+        </div>
+        <button onclick="logout()" class="text-sm font-semibold text-gray-500 hover:text-orange-600 transition-colors">Odjava</button>
+    </nav>
 
-        <nav class="navbar">
-            <div class="nav-content">
-                <span class="nav-icon">&lt;/&gt;</span>
-                <span class="nav-title">Ad Generator</span>
-            </div>
-        </nav>
+    <main class="w-full max-w-4xl mx-auto bg-white p-6 sm:p-10 sm:rounded-2xl shadow-none sm:shadow-2xl border-none sm:border border-orange-100 mb-0 sm:mb-10">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-orange-500">Generiranje objave</h2>
+            <div class="h-1 w-20 bg-orange-500 mx-auto mt-2 rounded-full"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Izberite starostno skupino:</label>
+                    <select id="group" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
+                        <option value="7-9">7-9 let</option>
+                        <option value="10-12">10-12 let</option>
+                        <option value="13-15">13-15 let</option>
+                        <option value="16">16+ let</option>
+                    </select>
+                </div>
 
-        <h2>Generiranje objave</h2>
-        <div class="form-grid">
-
-            <div class="form-group">
-                <label for="group">Izberite starostno skupino:</label>
-                <select id="group">
-                    <option value="7-9">7-9 let</option>
-                    <option value="10-12">10-12 let</option>
-                    <option value="13-15">13-15 let</option>
-                    <option value="16">16+ let</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="mood">Razpoloženje objave:</label>
-                <select id="mood">
-                    <option value="veselo">Veselo</option>
-                    <option value="motivacijsko">Motivacijsko</option>
-                    <option value="resno">Resno</option>
-                    <option value="igrivo">Igrivo</option>
-                    <option value="profesionalno">Profesionalno</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="length">Dolžina besedila:</label>
-                <select id="length">
-                    <option value="kratko">Kratko</option>
-                    <option value="srednje">Srednje</option>
-                    <option value="dolgo">Dolgo</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="time">Časovno obdobje objave:</label>
-                <select id="time">
-                    <option value="poletje">Poletje</option>
-                    <option value="zime">Zima</option>
-                    <option value="jesen">Jesen</option>
-                    <option value="Pomlad">Pomlad</option>
-                    <option value="Ne_vkljuci">Ne vključi</option>
-                </select>
-            </div>
-            <div id="topics-container" class="form-group">
-                <label>Izberite teme objave:</label>
-                <label><input type="checkbox" name="topic" value="Umetna inteligenca"> Umetna inteligenca</label>
-                <label><input type="checkbox" name="topic" value="Programiranje iger"> Programiranje iger</label>
-                <label><input type="checkbox" name="topic" value="Minecraft"> Minecraft</label>
-                <label><input type="checkbox" name="topic" value="Razvoj spletnih strani"> Spletne strani</label>
-                <label><input type="checkbox" name="topic" value="Brezplačne delavnice"> Delavnice</label>
-                <label><input type="checkbox" name="topic" value="Varnost na spletu"> Varnost</label>
-                <label><input type="checkbox" name="topic" value="Appinventor"> Appinventor</label>
-                <label><input type="checkbox" name="topic" value="Algoritmi"> Algoritmi</label>
-                <label><input type="checkbox" name="topic" value="Python"> Python</label>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Izberite teme objave:</label>
+                    <div id="topics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-56 overflow-y-auto shadow-inner">
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Umetna inteligenca" class="w-5 h-5 accent-orange-500"> Umetna inteligenca
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Programiranje iger" class="w-5 h-5 accent-orange-500"> Programiranje iger
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Minecraft" class="w-5 h-5 accent-orange-500"> Minecraft
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Razvoj spletnih strani" class="w-5 h-5 accent-orange-500"> Spletne strani
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Brezplačne delavnice" class="w-5 h-5 accent-orange-500"> Delavnice
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Varnost na spletu" class="w-5 h-5 accent-orange-500"> Varnost
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Appinventor" class="w-5 h-5 accent-orange-500"> Appinventor
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Algoritmi" class="w-5 h-5 accent-orange-500"> Algoritmi
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-600 cursor-pointer hover:text-orange-600 transition-colors">
+                            <input type="checkbox" name="topic" value="Python" class="w-5 h-5 accent-orange-500"> Python
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="platforma">Platforma objave:</label>
-                <select id="platforma">
-                    <option value="instagram">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                </select>
-            </div>
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Razpoloženje:</label>
+                        <select id="mood" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
+                            <option value="veselo">Veselo</option>
+                            <option value="motivacijsko">Motivacijsko</option>
+                            <option value="resno">Resno</option>
+                            <option value="igrivo">Igrivo</option>
+                            <option value="profesionalno">Profesionalno</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Dolžina:</label>
+                        <select id="length" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
+                            <option value="kratko">Kratko</option>
+                            <option value="srednje">Srednje</option>
+                            <option value="dolgo">Dolgo</option>
+                        </select>
+                    </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Časovno obdobje:</label>
+                        <select id="time" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
+                            <option value="poletje">Poletje</option>
+                            <option value="zime">Zima</option>
+                            <option value="jesen">Jesen</option>
+                            <option value="Pomlad">Pomlad</option>
+                            <option value="Ne_vkljuci">Ne vključi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Platforma:</label>
+                        <select id="platforma" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base">
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Opis objave:</label>
+                    <textarea id="description" rows="3" placeholder="Opiši kaj želiš v objavi..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50 text-base"></textarea>
+                </div>
+            </div>
         </div>
 
+        <button onclick="generate()" id="btn-generate" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-200 transition-all active:scale-95 mt-8 text-lg">
+            Generiraj predogled ✨
+        </button>
 
-
-        <label for="description">Opis objave:</label>
-        <textarea id="description" rows="4" placeholder="Opiši kaj želiš v objavi..."
-            style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-bottom:20px; font-size:16px;"></textarea>
-
-        <button onclick="generate()">Generiraj predogled</button>
-
-        <div id="preview" class="preview" style="display:none; margin-top:20px;">
-            <h3>Končni predogled</h3>
-
-            <textarea id="post-text" rows="30" readonly></textarea>
-
-            <br>
-            <strong id="post-reach"></strong>
-
-            <div class="actions">
-
-                <button class="icon-btn" onclick="enableEdit()" title="Uredi">
-                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213 3 21l1.787-4.5L16.862 3.487z" />
-                    </svg>
-                </button>
-
-                <button class="icon-btn" onclick="copyPost()" title="Kopiraj">
-                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24">
-                        <rect x="9" y="9" width="13" height="13" rx="2" />
-                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                    </svg>
-                </button>
-
+        <div id="preview" class="mt-10 p-4 sm:p-8 bg-orange-50 sm:rounded-2xl border-t border-b sm:border border-orange-200 hidden">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>Končni predogled</span>
+            </h3>
+            <textarea id="post-text" rows="12" class="w-full p-5 bg-white border border-orange-100 rounded-2xl text-gray-700 outline-none text-base leading-relaxed shadow-inner" readonly></textarea>
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mt-6">
+                <strong id="post-reach" class="text-orange-700 text-center sm:text-left bg-white px-4 py-2 rounded-lg shadow-sm"></strong>
+                <div class="flex justify-center gap-3">
+                    <button onclick="enableEdit()" class="flex-1 sm:flex-none px-6 py-3 bg-white border border-gray-200 rounded-xl font-bold hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm">Uredi</button>
+                    <button onclick="copyPost()" class="flex-1 sm:flex-none px-6 py-3 bg-orange-100 text-orange-700 border border-orange-200 rounded-xl font-bold hover:bg-orange-200 active:bg-orange-300 transition-colors shadow-sm">Kopiraj</button>
+                </div>
             </div>
         </div>
-
-    </div>
+    </main>
 
     <script>
         const token = localStorage.getItem("token");
-
-        if (!token) {
-            window.location.href = "/";
-        }
+        if (!token) window.location.href = "/";
 
         async function generate() {
-            const description = document.getElementById('description').value;
-            const groupVal = document.getElementById('group').value;
-            const moodVal = document.getElementById("mood").value;
-            const timeVal = document.getElementById("time").value;
-            const lengthVal = document.getElementById("length").value;
-            const platformVal = document.getElementById("platforma").value;
-
-            const selectedTopics = Array.from(document.querySelectorAll('input[name="topic"]:checked'))
-                .map(cb => cb.value);
-
+            const btn = document.getElementById("btn-generate");
+            const preview = document.getElementById("preview");
+            
+            const selectedTopics = Array.from(document.querySelectorAll('input[name="topic"]:checked')).map(cb => cb.value);
             if (selectedTopics.length === 0) {
                 alert('Prosimo, izberite vsaj eno temo.');
                 return;
             }
 
-            const topicString = selectedTopics.join(", ");
+            btn.disabled = true;
+            btn.innerText = "Generiram... ⏳";
+
+            const payload = {
+                group: document.getElementById('group').value,
+                topic: selectedTopics.join(", "),
+                description: document.getElementById('description').value,
+                mood: document.getElementById("mood").value,
+                time: document.getElementById("time").value,
+                length: document.getElementById("length").value,
+                platform: document.getElementById("platforma").value
+            };
 
             try {
                 const response = await fetch('http://localhost:5000/generate', {
@@ -152,29 +178,25 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({
-                        group: groupVal,
-                        topic: topicString,
-                        description: description,
-                        mood: moodVal,
-                        time: timeVal,
-                        length: lengthVal,
-                        platform: platformVal
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
-
-                const textarea = document.getElementById('post-text');
-                textarea.value = data.text;
-                textarea.setAttribute("readonly", true);
-
-                document.getElementById('post-reach').innerText = data.reach || "";
-                document.getElementById('preview').style.display = 'block';
-
+                if (response.ok) {
+                    const textarea = document.getElementById('post-text');
+                    textarea.value = data.text;
+                    textarea.setAttribute("readonly", true);
+                    document.getElementById('post-reach').innerText = data.reach || "";
+                    preview.classList.remove("hidden");
+                    preview.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert("Napaka: " + data.napaka);
+                }
             } catch (error) {
-                console.error(error);
-                alert("Napaka pri generiranju.");
+                alert("Napaka pri povezavi s strežnikom.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Generiraj predogled ✨";
             }
         }
 
@@ -182,16 +204,20 @@
             const textarea = document.getElementById('post-text');
             textarea.removeAttribute("readonly");
             textarea.focus();
+            textarea.classList.add("ring-2", "ring-orange-500");
         }
 
         function copyPost() {
             const text = document.getElementById('post-text').value;
-
             navigator.clipboard.writeText(text)
-                .then(() => alert("Kopirano!"))
+                .then(() => alert("Kopirano v odložišče!"))
                 .catch(err => console.error(err));
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/";
         }
     </script>
 </body>
-
 </html>

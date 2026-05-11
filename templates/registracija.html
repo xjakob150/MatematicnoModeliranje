@@ -2,91 +2,58 @@
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
-    <title>Registracija</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registracija | Coding Giants</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-orange-50 to-slate-200">
 
-<body>
-<div class="main-container">
-    <h2>Registracija</h2>
+    <div class="w-full max-w-md bg-white min-h-screen sm:min-h-0 p-8 sm:rounded-2xl shadow-none sm:shadow-2xl border-none sm:border border-orange-100 flex flex-col justify-center">
+        <div class="text-center mb-8">
+            <span class="text-orange-500 font-bold text-5xl">&lt;/&gt;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mt-4">Ustvari račun</h2>
+        </div>
 
-    <div class="login_wrapper">
-        <div id="error" class="error-msg" style="display:none;"></div>
-        <div id="success" class="success-msg" style="display:none;"></div>
+        <div id="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded-xl text-sm hidden"></div>
 
-        <label for="ime">Ime</label>
-        <input type="text" id="ime" placeholder="Vnesi ime">
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" id="ime" placeholder="Ime" class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none bg-gray-50">
+                <input type="text" id="priimek" placeholder="Priimek" class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none bg-gray-50">
+            </div>
+            <input type="email" id="email" placeholder="Email" class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none bg-gray-50">
+            <input type="password" id="geslo" placeholder="Geslo" class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none bg-gray-50">
+            
+            <button onclick="registracija()" class="w-full bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform text-lg mt-4">Registriraj se</button>
+        </div>
 
-        <label for="priimek">Priimek</label>
-        <input type="text" id="priimek" placeholder="Vnesi priimek">
-
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Vnesi email">
-
-        <label for="geslo">Geslo</label>
-        <input type="password" id="geslo" placeholder="Vnesi geslo">
-
-        <button onclick="registracija()">Registriraj se</button>
-
-        <p>Že imaš račun? <a href="/">Prijavi se</a></p>
+        <p class="mt-8 text-center text-gray-600">
+            Že imaš račun? <a href="/prijava-stran" class="text-orange-600 font-bold">Prijavi se</a>
+        </p>
     </div>
-</div>
 
-<script>
-async function registracija() {
-
-    const ime = document.getElementById("ime").value;
-    const priimek = document.getElementById("priimek").value;
-    const email = document.getElementById("email").value;
-    const geslo = document.getElementById("geslo").value;
-
-    const error = document.getElementById("error");
-    const success = document.getElementById("success");
-
-    error.style.display = "none";
-    success.style.display = "none";
-
-    try {
-
-        const response = await fetch("http://127.0.0.1:5000/registracija", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                ime: ime,
-                priimek: priimek,
-                email: email,
-                geslo: geslo
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-
-            success.innerText = "Registracija uspešna. Zdaj se lahko prijaviš.";
-            success.style.display = "block";
-
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 1500);
-
-        } else {
-
-            error.innerText = data.napaka;
-            error.style.display = "block";
+    <script>
+        async function registracija() {
+            const payload = {
+                ime: document.getElementById("ime").value,
+                priimek: document.getElementById("priimek").value,
+                email: document.getElementById("email").value,
+                geslo: document.getElementById("geslo").value
+            };
+            try {
+                const response = await fetch("/registracija", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) window.location.href = "/prijava-stran";
+                else {
+                    const data = await response.json();
+                    document.getElementById("error").innerText = data.napaka;
+                    document.getElementById("error").classList.remove("hidden");
+                }
+            } catch (err) { alert("Napaka pri povezavi."); }
         }
-
-    } catch (err) {
-
-        error.innerText = "Napaka pri povezavi s strežnikom.";
-        error.style.display = "block";
-
-        console.error(err);
-    }
-}
-</script>
-
+    </script>
 </body>
 </html>
