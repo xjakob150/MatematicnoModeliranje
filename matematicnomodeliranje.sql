@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 07, 2026 at 03:13 PM
+-- Generation Time: May 12, 2026 at 10:41 AM
 -- Server version: 5.6.20-log
 -- PHP Version: 5.4.31
 
@@ -31,10 +31,23 @@ CREATE TABLE IF NOT EXISTS `generiranje_oglasa` (
   `starostna_skupina` varchar(50) COLLATE utf8_slovenian_ci DEFAULT NULL,
   `casovno_obdobje` varchar(50) COLLATE utf8_slovenian_ci DEFAULT NULL,
   `razpolozenje_objave` varchar(50) COLLATE utf8_slovenian_ci DEFAULT NULL,
-  `opis_objave` varchar(255) COLLATE utf8_slovenian_ci DEFAULT NULL,
+  `opis_objave` text COLLATE utf8_slovenian_ci,
   `id_uporabnika` int(11) DEFAULT NULL,
-  `id_platforme` int(11) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_slovenian_ci AUTO_INCREMENT=1 ;
+  `id_platforme` int(11) DEFAULT NULL,
+  `Dolzina_objave` varchar(100) COLLATE utf8_slovenian_ci NOT NULL,
+  `teme_objave` varchar(255) COLLATE utf8_slovenian_ci NOT NULL,
+  `datum_ustvarjanja` datetime NOT NULL,
+  `predviden_doseg` int(11) NOT NULL
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_slovenian_ci AUTO_INCREMENT=4 ;
+
+--
+-- Dumping data for table `generiranje_oglasa`
+--
+
+INSERT INTO `generiranje_oglasa` (`id_oglasa`, `starostna_skupina`, `casovno_obdobje`, `razpolozenje_objave`, `opis_objave`, `id_uporabnika`, `id_platforme`, `Dolzina_objave`, `teme_objave`, `datum_ustvarjanja`, `predviden_doseg`) VALUES
+(1, '7', 'Ne_vkljuci', 'resno', 'Vstopamo v obdobje, kjer digitalna pismenost ne predstavlja več zgolj prednosti na trgu dela, temveč postaja temeljna kompetenca sodobnega posameznika. Pri Coding Giants se zavedamo odgovornosti, ki jo nosimo pri usmerjanju mladih talentov v svet tehnolog', 2, 1, 'dolgo', 'Programiranje iger, Razvoj spletnih strani', '2026-05-11 20:05:43', 10396),
+(2, '7', 'Pomlad', 'veselo', '? Sonce sije, cvetje brsti, v Coding Giants pa varnost na spletu v pomladnem vzdušju živi! ☀️? \n\nMedtem ko v naravi vse cveti, mi v varnem digitalnem okolju osvajamo nove svetove! ? Postajamo pravi digitalni vitezi, ki znajo varno raziskovati internet, medtem ko programiramo nore dogodivščine v #Minecraftu in #Scratchu. ??️\n\nTudi pri snovanju spletnih strani in ustvarjanju prvih #AI klepetalnikov v #Pythonu poskrbimo, da naše znanje raste varno in premišljeno. ?✨ Nauči se, kako biti pravi spletni junak, ki uživa v tehnologiji brez skrbi! ?\n\nPridruži se nam na Coding Giants, kjer je spomladanska energija nalezljiva, tvoja varnost pa naša prva prioriteta! ??✨\n\n#CodingGiants #VarnostNaSpletu #MladiProgramerji #Pomlad #Minecraft #Scratch #Python #DigitalneKompetence #VarnoNaSpletu', 2, 2, 'kratko', 'Varnost na spletu', '2026-05-11 20:07:57', 10396),
+(3, '13', 'zime', 'veselo', '❄️ Zunaj sneži, pri nas pa se iskri od novih idej! ❄️\n\nNe pusti, da te mraz ustavi – raje ogrej svoje prste na tipkovnici in se nam pridruži na BREZPLAČNIH zimskih delavnicah Coding Giants! ?✨ Vstopi v čudoviti svet umetne inteligence in postani ustvarjalec digitalne prihodnosti v najbolj veseli družbi. ?\n\nKaj vse bomo ušpičili?\n? Programirali bomo nepozabne dogodivščine v #Minecraft in #Scratch,\n? snovali stilske spletne strani s #HTML in #CSS,\n? v #Pythonu pa bomo ustvarili tvoj čisto prvi **AI ChatBot** klepetalnik! ??\n\nPridruži se nam na nepozabni zimski programerski zabavi, kjer domišljija nima meja! Število mest je omejeno, zato pohiti in si zagotovi svoj stolček v svetu kodiranja. ❄️?\n\nSe vidimo? Veselo in pogumno v svet tehnologije! ?\n\n#CodingGiants #UmetnaInteligenca #BrezplacneDelavnice #ProgramiranjeZaOtroke #ZimskaZabava #Python #Minecraft #SolaProgramiranja #MladiGeniji #AI', 2, 2, 'kratko', 'Umetna inteligenca, Brezplačne delavnice', '2026-05-11 20:33:04', 9491);
 
 -- --------------------------------------------------------
 
@@ -250,7 +263,15 @@ CREATE TABLE IF NOT EXISTS `uporabnik` (
   `priimek` varchar(50) COLLATE utf8_slovenian_ci NOT NULL,
   `email` varchar(50) COLLATE utf8_slovenian_ci NOT NULL,
   `geslo` varchar(255) COLLATE utf8_slovenian_ci NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_slovenian_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_slovenian_ci AUTO_INCREMENT=3 ;
+
+--
+-- Dumping data for table `uporabnik`
+--
+
+INSERT INTO `uporabnik` (`id_uporabnika`, `ime`, `priimek`, `email`, `geslo`) VALUES
+(1, 'Jakob', 'Lipovecf', 'xjakob150@gmail.com', 'scrypt:32768:8:1$6CplwAH6gf9FaVZk$6b093d92bb387b79f74203468358b0873f44ff8b792edd9372749eff191126cb048a2dcc76c13440e48a00cd04b47a30413a23463fc1b92b01780b57ba50f14a'),
+(2, '1', '1', '1', 'scrypt:32768:8:1$fLya39K0pNPyIM1X$29af71f47e7265bedd5dc63f9f7130798c9354c7276f955f9db1b69f8e29370fdd4fe5e8ffc11416295a889f048d8b9752fc54a7554d59e3b309dfbc33b7f3d2');
 
 -- --------------------------------------------------------
 
@@ -862,7 +883,7 @@ ALTER TABLE `zgodovina_oglasov_teme`
 -- AUTO_INCREMENT for table `generiranje_oglasa`
 --
 ALTER TABLE `generiranje_oglasa`
-MODIFY `id_oglasa` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id_oglasa` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `platforma`
 --
@@ -882,7 +903,7 @@ MODIFY `id_teme` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=135;
 -- AUTO_INCREMENT for table `uporabnik`
 --
 ALTER TABLE `uporabnik`
-MODIFY `id_uporabnika` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id_uporabnika` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `zgodovina_oglasov`
 --
