@@ -33,7 +33,6 @@ body {
 
 .nav-logo {
     height: 40px;
-    /* Prilagodi višino glede na tvoj logo */
     width: auto;
     object-fit: contain;
 }
