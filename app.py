@@ -8,7 +8,7 @@ import pandas as pd
 import random
 from google import genai
 from flask_cors import CORS
-
+import emoji
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -56,10 +56,9 @@ def token_required(f):
 # 1) NALAGANJE MODELA IN ENCODERJA
 # ---------------------------------------------------------
 try:
-    bundle = joblib.load("model_bundle.pkl")
-    model = bundle["model"]
-    encoder_tema = bundle["encoder_tema"]
-    print("✅ Model uspešno naložen.")
+    model = joblib.load("model.pkl")
+    encoder_tema = joblib.load("encoder_tema.pkl")
+    print("✅ Model in Encoder uspešno naložena.")
 except Exception as e:
     print(f"❌ Napaka pri nalaganju modela: {e}")
     
@@ -113,6 +112,26 @@ def map_user_theme(theme):
     }
     return mapping.get(theme, "Drugo")
 
+def extract_text_features(text):
+    if not isinstance(text, str): text = ""
+    num_chars = len(text)
+    num_words = len(text.split())
+    num_lines = text.count("\n") + 1
+    num_emojis = sum(1 for char in text if char in emoji.EMOJI_DATA)
+    num_exclaims = text.count("!")
+    num_questions = text.count("?")
+    num_periods = text.count(".")
+    paragraphs = text.split("\n")
+    longest_paragraph = max(len(p) for p in paragraphs) if paragraphs else 0
+    emoji_ratio = num_emojis / num_words if num_words > 0 else 0
+    punctuation_ratio = (num_exclaims + num_questions + num_periods) / num_chars if num_chars > 0 else 0
+
+    return [
+        num_chars, num_words, num_lines, num_emojis,
+        num_exclaims, num_questions, num_periods,
+        longest_paragraph, emoji_ratio, punctuation_ratio
+    ]
+
 def get_numeric_age(group_str):
     """Pretvori npr. '7-9' v 7.0 (spodnja meja, kot v treningu)."""
     try:
@@ -121,25 +140,25 @@ def get_numeric_age(group_str):
         return 10.0 # Default če pride do napake
 
 def predict_reach(text, age_group):
-    # 1. Izlušči in mapiraj teme
+    # 1. Teme
     detected = extract_themes_from_text(text)
     mapped = [map_user_theme(t) for t in detected]
-    
-    # 2. One-hot encoding (pazi: transform pričakuje 2D array)
     tema_encoded = encoder_tema.transform(np.array(mapped).reshape(-1, 1))
-    
-    # Če je več tem, jih seštejemo v en vektor (tako kot v tvojem trening skriptu)
     tema_vector = tema_encoded.sum(axis=0).reshape(1, -1)
     
-    # 3. Starost
+    # 2. Starost
     age_val = get_numeric_age(age_group)
     starost_vector = np.array([[age_val]])
     
-    # 4. Združi v X in napovej
-    X_input = np.hstack([tema_vector, starost_vector])
-    prediction = model.predict(X_input)[0]
+    # 3. Tekstovne značilke (TUKAJ JE MANJKALO)
+    text_features = extract_text_features(text)
+    text_vector = np.array([text_features])
     
-    return max(0, int(round(prediction))) # Preprečimo negativne številke
+    # 4. Združi VSE (Tema + Starost + Tekst)
+    X_input = np.hstack([tema_vector, starost_vector, text_vector])
+    
+    prediction = model.predict(X_input)[0]
+    return max(0, int(round(prediction)))
 
 # ---------------------------------------------------------
 # 3) GEMINI KONFIGURACIJA
