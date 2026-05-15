@@ -64,7 +64,7 @@ except Exception as e:
     
 try:
     df_posts = pd.read_csv("Objave_mar2025_mar2026_FB.csv")
-    fifth_column = df_posts.iloc[:, 4].dropna().tolist()  # 5. stolpec (index 4)
+    fifth_column = df_posts.iloc[:, 4].dropna().tolist()
     print("✅ CSV uspešno naložen.")
 except Exception as e:
     print(f"❌ Napaka pri branju CSV: {e}")
@@ -137,7 +137,7 @@ def get_numeric_age(group_str):
     try:
         return float(group_str.split('-')[0])
     except:
-        return 10.0 # Default če pride do napake
+        return 10.0
 
 def predict_reach(text, age_group):
     # 1. Teme
@@ -146,15 +146,12 @@ def predict_reach(text, age_group):
     tema_encoded = encoder_tema.transform(np.array(mapped).reshape(-1, 1))
     tema_vector = tema_encoded.sum(axis=0).reshape(1, -1)
     
-    # 2. Starost
     age_val = get_numeric_age(age_group)
     starost_vector = np.array([[age_val]])
     
-    # 3. Tekstovne značilke (TUKAJ JE MANJKALO)
     text_features = extract_text_features(text)
     text_vector = np.array([text_features])
     
-    # 4. Združi VSE (Tema + Starost + Tekst)
     X_input = np.hstack([tema_vector, starost_vector, text_vector])
     
     prediction = model.predict(X_input)[0]
@@ -185,11 +182,14 @@ class AIModel:
         
         try:
             response = client.models.generate_content(
-                model="gemini-3-flash-preview", # Uporabi stabilno verzijo
+                model="gemini-3-flash-preview",
                 contents=prompt
             )
             text = response.text
         except Exception as e:
+            import traceback
+            print("❌ GEMINI ERROR:")
+            traceback.print_exc()
             print(f"Napaka Gemini: {e}")
             text = f"Pridružite se nam na delavnici {topic}! 🚀"
 
@@ -202,16 +202,14 @@ class AIModel:
 
 @app.route('/')
 def login_page():
-    # To bo odprlo login.html ob obisku http://127.0.0.1:5000
     return render_template('login.html')
 
 @app.route('/index.html')
 def index_page():
-    # To je stran, na katero te vrže JS funkcija
     return render_template('index.html')
 
 @app.route('/generate', methods=['POST'])
-@token_required # dodal merih da preverja jwt
+@token_required
 def generate_post():
     try:
         data = request.get_json(force=True)
@@ -237,10 +235,8 @@ def generate_post():
             return jsonify({"error": "Manjka skupina ali tema."}), 400
 
         
-        # 1. Generiraj besedilo z AI
         generated_text, img_url = AIModel.generate(topic, description, time, mood, length, platform)
         
-        # 2. Napovej doseg z XGBoost modelom
         reach_val = predict_reach(generated_text, group)
         reach_formatted = f"{reach_val:,}".replace(',', '.')
         
@@ -380,7 +376,6 @@ def dobi_zgodovino():
         conn = povezava()
         cursor = conn.cursor(dictionary=True)
         
-        # Pridobimo zadnjih 10 objav
         query = """
             SELECT id_oglasa, teme_objave, opis_objave, datum_ustvarjanja 
             FROM generiranje_oglasa 
