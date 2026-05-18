@@ -393,13 +393,53 @@ def dobi_zgodovino():
     except Exception as e:
         return jsonify({"napaka": str(e)}), 500
 
+@app.route('/starostne-skupine', methods=['GET'])
+def pridobi_starostne_skupine():
+    try:
+        conn = povezava()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT ime_tecaja, starostna_skupina, cena FROM tecaji")
+        skupine = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        return jsonify(skupine), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/registracija-stran")
 def registracija_stran():
     return render_template("registracija.html")
 
+@app.route('/uporabnik', methods=['GET'])
+@token_required
+def pridobi_uporabnika():
+    try:
+        uporabnik_id = request.uporabnik_id
+        conn = povezava()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT ime, priimek, email FROM uporabnik WHERE id_uporabnika = %s", (uporabnik_id,))
+        uporabnik = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if uporabnik:
+            return jsonify(uporabnik), 200
+        else:
+            return jsonify({"napaka": "Uporabnik ni najden"}), 404
+    except Exception as e:
+        return jsonify({"napaka": str(e)}), 500
+
 @app.route("/prijava-stran")
 def prijava_stran():
     return render_template("login.html")
+
+@app.route('/user-stran')
+def user_page():
+    return render_template('user.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
