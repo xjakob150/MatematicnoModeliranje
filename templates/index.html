@@ -7,11 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Scrollbar styling */
-        #history-container::-webkit-scrollbar { width: 4px; }
-        #history-container::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
-        
-        #topics-container::-webkit-scrollbar { width: 5px; }
-        #topics-container::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
 
         .truncate-2-lines {
             display: -webkit-box;
@@ -66,7 +63,7 @@
             
             <div class="flex items-center gap-4 text-sm font-semibold">
                 <a href="/index.html" class="text-orange-600 border-b-2 border-orange-500 pb-1">Generator</a>
-                <a href="/user.html" class="text-gray-500 hover:text-orange-500 transition-colors">Moj Profil</a>
+                <a href="/user-stran" class="text-gray-500 hover:text-orange-500 transition-colors">Moj Profil</a>
             </div>
         </div>
         <button onclick="logout()" class="text-sm font-semibold text-gray-500 hover:text-orange-600 transition-colors">Odjava</button>
