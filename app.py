@@ -432,6 +432,63 @@ def pridobi_uporabnika():
             return jsonify({"napaka": "Uporabnik ni najden"}), 404
     except Exception as e:
         return jsonify({"napaka": str(e)}), 500
+    
+#---------------------
+#dodal merih userpage
+#_____________
+@app.route('/user', methods=['PUT'])
+@token_required
+def update_user():
+    try:
+        user_id = request.uporabnik_id
+        data = request.get_json()
+
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
+        email = data.get("email")
+        new_password = data.get("new_password")
+
+        if not first_name or not last_name or not email:
+            return jsonify({"error": "First name, last name and email are required"}), 400
+
+        conn = povezava()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute(
+            "SELECT id_uporabnika FROM uporabnik WHERE email = %s AND id_uporabnika != %s",
+            (email, user_id)
+        )
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "This email is already in use"}), 409
+
+        if new_password:
+            password_hash = generate_password_hash(new_password)
+            cursor.execute("""
+                UPDATE uporabnik
+                SET ime = %s, priimek = %s, email = %s, geslo = %s
+                WHERE id_uporabnika = %s
+            """, (first_name, last_name, email, password_hash, user_id))
+        else:
+            cursor.execute("""
+                UPDATE uporabnik
+                SET ime = %s, priimek = %s, email = %s
+                WHERE id_uporabnika = %s
+            """, (first_name, last_name, email, user_id))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "User data updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
 
 @app.route("/prijava-stran")
 def prijava_stran():
