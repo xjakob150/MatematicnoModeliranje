@@ -12,7 +12,6 @@ venv
 .vscode
 .idea
 
-Dockerfile
 README.md
 
 *.log
