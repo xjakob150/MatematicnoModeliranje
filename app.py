@@ -292,10 +292,10 @@ def generate_post():
 # Povezava na bazo
 def povezava():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="root",          
-        database="matematicnomodeliranje"
+        host=os.getenv("DB_HOST", "db"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "matematicnomodeliranje")
     )
 
 @app.route("/registracija", methods = ["POST"])
@@ -497,7 +497,3 @@ def prijava_stran():
 @app.route('/user-stran')
 def user_page():
     return render_template('user.html')
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)

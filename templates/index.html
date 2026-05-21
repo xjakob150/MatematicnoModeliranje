@@ -239,7 +239,7 @@
         async function loadHistory() {
             const container = document.getElementById("history-container");
             try {
-                const response = await fetch('http://localhost:5000/zgodovina', {
+                const response = await fetch('/zgodovina', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const posts = await response.json();
@@ -291,7 +291,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:5000/generate', {
+                const response = await fetch('/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify(payload)
