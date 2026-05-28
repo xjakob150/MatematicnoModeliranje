@@ -3,7 +3,7 @@ name: Build Docker image and call webhook
 on:
   push:
     branches:
-      - maste
+      - master
 
 jobs:
   build-and-push:
