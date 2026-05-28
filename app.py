@@ -286,7 +286,7 @@ def generate_post():
         return jsonify({"error": f"Strežniška napaka: {str(e)}"}), 500
 
 # ---------------------------------------------------------
-#  LOGIN/REGISTRACIJSKA STRAN (dodal merih)
+#  LOGIN/REGISTRACIJSKA STRAN 
 # ---------------------------------------------------------
 
 # Povezava na bazo
