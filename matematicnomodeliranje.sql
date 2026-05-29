@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `generiranje_oglasa` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=28 ;
 
 --
--- Dumping data for table `generiranje_oglasa`
+-- Dumping data for table `generiranje_oglasa` 
 --
 
 INSERT INTO `generiranje_oglasa` (`id_oglasa`, `starostna_skupina`, `casovno_obdobje`, `razpolozenje_objave`, `opis_objave`, `id_uporabnika`, `id_platforme`, `Dolzina_objave`, `teme_objave`, `datum_ustvarjanja`, `predviden_doseg`) VALUES

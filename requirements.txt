@@ -13,4 +13,3 @@ python-dotenv
 mysql-connector-python
 pyJWT
 emoji==2.3.0
-subprocess
