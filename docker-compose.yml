@@ -1,5 +1,6 @@
 version: "3.8"
 
+name: matematicnomodeliranje
 services:
   db:
     image: mariadb:10.6
