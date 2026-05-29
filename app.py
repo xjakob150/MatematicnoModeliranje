@@ -53,7 +53,7 @@ def token_required(f):
     return decorated
 
 # ---------------------------------------------------------
-# 1) NALAGANJE MODELA IN ENCODERJA
+# 1) NALAGANJE MODELA IN ENCODERJA - test
 # ---------------------------------------------------------
 try:
     model = joblib.load("model.pkl")
