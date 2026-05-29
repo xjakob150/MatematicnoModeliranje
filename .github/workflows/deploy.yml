@@ -40,4 +40,5 @@ jobs:
         run: |
           curl -X POST "${{ secrets.WEBHOOK_URL }}" \
           -H "Content-Type: application/json" \
-          -d '{"status":"success","image":"xjakob150/matematicnomodeliranje:web","commit":"${{ github.sha }}"}'
+          -H "X-Webhook-Secret: ${{ secrets.MY_WEBHOOK_SECRET }}" \
+          -d '{"status":"success"}'

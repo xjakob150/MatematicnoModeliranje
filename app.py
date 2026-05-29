@@ -13,6 +13,7 @@ import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
+import subprocess
 from functools import wraps
 
 
@@ -489,6 +490,23 @@ def update_user():
         return jsonify({"error": str(e)}), 500
     
     
+    
+@app.route('/webhook', methods=['POST'])
+def github_webhook():
+
+    prejeti_token = request.headers.get('X-Webhook-Secret')
+    skrivni_token = os.getenv("MY_WEBHOOK_SECRET")
+    
+    if prejeti_token != skrivni_token:
+        return jsonify({"napaka": "Nepooblaščen dostop"}), 403
+
+    print("🚀 Prejet veljaven signal iz GitHuba! Zaganjam deploy.sh...")
+    
+    try:
+        subprocess.Popen(["/bin/bash", "/home/xjakob150/MatematicnoModeliranje/deploy.sh"])
+        return jsonify({"sporocilo": "Posodobitev uspešno sprožena!"}), 200
+    except Exception as e:
+        return jsonify({"napaka": f"Napaka pri zagonu skripte: {str(e)}"}), 500
 
 @app.route("/prijava-stran")
 def prijava_stran():
