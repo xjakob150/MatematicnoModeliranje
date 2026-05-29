@@ -38,20 +38,6 @@ services:
     networks:
       - appnet
 
-  webhook:
-    build: 
-      context: . 
-      dockerfile: webhook/Dockerfile
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - .:/app
-    expose:
-      - "9000"
-    working_dir: /app  
-    networks:
-      - appnet
-
 networks:
   appnet:
 
