@@ -9,8 +9,10 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     build-essential \
+    docker.io \
+    docker-compose \
     && rm -rf /var/lib/apt/lists/*
-
+    
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && \
