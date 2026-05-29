@@ -1,6 +1,7 @@
 version: "3.8"
 
 name: matematicnomodeliranje
+
 services:
   db:
     image: mariadb:10.6
@@ -21,9 +22,6 @@ services:
       - db
     env_file:
       - .env
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /home/xjakob150/MatematicnoModeliranje:/home/xjakob150/MatematicnoModeliranje
     networks:
       - appnet
 
@@ -36,6 +34,19 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - web
+      - webhook
+    networks:
+      - appnet
+
+  webhook:
+    build: ./webhook
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/xjakob150/MatematicnoModeliranje:/app
+    expose:
+      - "9000"
+    working_dir: /app
     networks:
       - appnet
 
