@@ -508,8 +508,10 @@ def github_webhook():
 
 @app.route("/prijava-stran")
 def prijava_stran():
-    return render_template("login.html")
+    return render_template("login.html")#
 
 @app.route('/user-stran')
 def user_page():
     return render_template('user.html')
+
+##
