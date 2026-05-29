@@ -489,22 +489,18 @@ def update_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route('/webhook', methods=['POST'])
-def github_webhook():
+@app.route('/deploy-trigger', methods=['POST'])
+def deploy_trigger():
+    token = request.headers.get("X-Webhook-Secret")
 
-    prejeti_token = request.headers.get('X-Webhook-Secret')
-    skrivni_token = os.getenv("MY_WEBHOOK_SECRET")
-    
-    if prejeti_token != skrivni_token:
-        return jsonify({"napaka": "Nepooblaščen dostop"}), 403
+    if token != os.getenv("MY_WEBHOOK_SECRET"):
+        return jsonify({"error": "unauthorized"}), 403
 
-    print("🚀 Prejet veljaven signal iz GitHuba! Zaganjam deploy.sh...")
-    
-    try:
-        subprocess.Popen(["/bin/bash", "/home/xjakob150/MatematicnoModeliranje/deploy.sh"])
-        return jsonify({"sporocilo": "Posodobitev uspešno sprožena!"}), 200
-    except Exception as e:
-        return jsonify({"napaka": f"Napaka pri zagonu skripte: {str(e)}"}), 500
+    # napišemo signal na HOST preko shared volume
+    with open("/tmp/deploy.trigger", "w") as f:
+        f.write("1")
+
+    return jsonify({"status": "deploy triggered"})
 
 @app.route("/prijava-stran")
 def prijava_stran():
