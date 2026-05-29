@@ -14,7 +14,7 @@ services:
       - appnet
 
   web:
-    build: .
+    image: xjakob150/matematicnomodeliranje:web
     restart: always
     depends_on:
       - db
