@@ -22,6 +22,8 @@ services:
       - .env
     networks:
       - appnet
+    ports:
+      - "9000:9000"
 
   nginx:
     image: nginx:alpine
